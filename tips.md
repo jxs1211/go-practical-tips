@@ -219,6 +219,28 @@ You might consider using it for tracking certain request-related data like:
 
 If payment information is important across multiple functions, it's clearer and safer to pass it **explicitly** through function parameters, this helps anyone reading the code immediately understand that the function directly interacts with the payment data.
 
+```go
+func A(ctx context.Context, transactionID string) {
+    payment := db.GetPayment(ctx, transactionID)
+    // ctx = context.WithValue(ctx, "payment", payment)
+
+    B(ctx, payment)
+}
+
+func B(ctx context.Context, payment Payment) {
+    ...
+
+    C(ctx, payment)
+}
+
+func C(ctx context.Context, payment Payment) {
+    // payment, ok := ctx.Value("payment").(Payment)
+
+    handlePayment(payment)
+    ...
+}
+```
+
 Generally, it's better to avoid embedding critical business data within the context, this strategy keeps our code **clear** and maintainable.
 
 ### Keep Contexts Alive with `context.WithoutCancel()`
