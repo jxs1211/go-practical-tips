@@ -355,6 +355,26 @@ If you call `stop()` before the context finishes and the callback hasn't run yet
 
 But, if `stop()` returns `false`, it could mean either the function `f` has already started running in a new goroutine, or it has been stopped already.
 
+```go
+func AfterFunc(ctx Context, f func()) (stop func() bool) {
+	a := &afterFuncCtx{
+		f: f,
+	}
+	a.cancelCtx.propagateCancel(ctx, a)
+	return func() bool {
+		stopped := false
+		a.once.Do(func() {
+			// only can be called at the first time
+			stopped = true
+		})
+		if stopped {
+			a.cancel(true, Canceled, nil)
+		}
+		return stopped
+	}
+}
+```
+
 ### Use an Unexported Empty Struct as a Context Key
 
 Context (context.Context) is great for passing request-scoped values along with cancellation signals and deadlines, you might sometimes need to add and retrieve values from the context. Let’s look at a basic example:
