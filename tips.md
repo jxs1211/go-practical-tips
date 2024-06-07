@@ -531,7 +531,7 @@ This shorter version does essentially the same thing but compresses it into a si
 There's actually another way to handle errors in deferred calls using a neat helper function:
 
 ```go
-defer closeWithError(&err, file)
+defer closeWithError(&err, file.Close)
 
 func closeWithError(err *error, f func() error) {
     *err = errors.Join(*err, f())
